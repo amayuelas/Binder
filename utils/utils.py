@@ -144,11 +144,36 @@ def majority_vote(
     pred_answer, pred_answer_nsqls = list(pred_answer_info[0]), pred_answer_info[1]['nsqls']
     return pred_answer, pred_answer_nsqls
 
+def process_finqa_item(data_item):
+    new_data_item = {
+        "id": data_item['id'],
+        "table": {
+            "id": data_item['id'],
+            "header": data_item['table'][0],
+            "rows": data_item['table'][1:],
+            "caption": data_item['id'],
+            "page_title": data_item['id']
+
+        },
+        "title": data_item['id'],
+        "question": data_item["qa"]["question"],
+        "answer_text": data_item["qa"]["answer"]
+    }
+    return new_data_item
+
 
 def load_data_split(dataset_to_load, split, data_dir=os.path.join(ROOT_DIR, 'datasets/')):
-    dataset_split_loaded = load_dataset(
-        path=os.path.join(data_dir, "{}.py".format(dataset_to_load)),
-        cache_dir=os.path.join(data_dir, "data"))[split]
+
+    if dataset_to_load == 'finQA':
+        filename = "datasets/finqa_test.json"
+        dataset_split_loaded = json.load(open(os.path.join(ROOT_DIR, filename)))
+    elif dataset_to_load == 'finQA_table':
+        filename = "datasets/finqa_test_table.json"
+        dataset_split_loaded = json.load(open(os.path.join(ROOT_DIR, filename)))
+    else:
+        dataset_split_loaded = load_dataset(
+            path=os.path.join(data_dir, "{}.py".format(dataset_to_load)),
+            cache_dir=os.path.join(data_dir, "data"))[split]
 
     # unify names of keys
     if dataset_to_load in ['wikitq', 'has_squall', 'missing_squall',
@@ -180,6 +205,11 @@ def load_data_split(dataset_to_load, split, data_dir=os.path.join(ROOT_DIR, 'dat
         for data_item in dataset_split_loaded:
             data_item['table']['page_title'] = data_item['table']['title']
             new_dataset_split_loaded.append(data_item)
+        dataset_split_loaded = new_dataset_split_loaded
+    elif dataset_to_load in ['finQA', 'finQA_table']:
+        new_dataset_split_loaded = []
+        for data_item in dataset_split_loaded:
+            new_dataset_split_loaded.append(process_finqa_item(data_item))
         dataset_split_loaded = new_dataset_split_loaded
     else:
         raise ValueError(f'{dataset_to_load} dataset is not supported now.')

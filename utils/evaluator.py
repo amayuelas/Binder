@@ -25,6 +25,8 @@ class Evaluator:
             # For more metrics on MMQA,
             # please use the utils/mmqa/eval_mmqa.py to call official on all prediction data
             return self.eval_mmqa_match(pred_answer, gold_answer)
+        elif dataset in ['finQA', 'finQA_table']:
+            return self.eval_tabfact_match(pred_answer, gold_answer)
         else:
             raise ValueError(f'{dataset} evaluator is not supported.')
 
