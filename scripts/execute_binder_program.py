@@ -1,6 +1,8 @@
 """
 Multiprocess executing binder programs.
 """
+import sys
+sys.path.append("/data4/aamayuelasfernandez/Binder")
 
 import json
 import argparse
@@ -83,6 +85,7 @@ def worker_execute(
         )
         # Evaluate
         result_dict[eid]['pred_answer'] = pred_answer
+        result_dict[eid]['pred_answers'] = exec_answer_list
         result_dict[eid]['nsql'] = pred_answer_nsqls
         gold_answer = data_item['answer_text']
         score = Evaluator().evaluate(
@@ -99,6 +102,11 @@ def worker_execute(
         else:
             print(f'Process#{pid}: Wrong.')
         print(f'Process#{pid}: Accuracy: {n_correct_samples}/{n_total_samples}')
+
+
+        # Save program executions
+        with open(os.path.join(args.save_dir, args.output_program_execution_file), 'w') as f:
+            json.dump(result_dict, f)
 
     return result_dict
 
@@ -185,7 +193,7 @@ if __name__ == '__main__':
 
     # File path or name
     parser.add_argument('--dataset', type=str, default='tab_fact',
-                        choices=['wikitq', 'tab_fact'])
+                        choices=['wikitq', 'tab_fact', 'finQA_table'])
     parser.add_argument('--dataset_split', type=str, default='validation', choices=['train', 'validation', 'test'])
     parser.add_argument('--api_keys_file', type=str, default='key.txt')
     parser.add_argument('--save_dir', type=str, default='results/')
@@ -196,7 +204,7 @@ if __name__ == '__main__':
                         default='binder_program_execution_tab_fact_validation.json')
 
     # Multiprocess options
-    parser.add_argument('--n_processes', type=str, default=4)
+    parser.add_argument('--n_processes', type=int, default=1)
 
     # Execution options
     parser.add_argument('--use_majority_vote', action='store_false',

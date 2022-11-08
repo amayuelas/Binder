@@ -2,6 +2,9 @@
 Multiprocess annotating binder programs.
 """
 
+import sys
+sys.path.append("/data4/aamayuelasfernandez/Binder")
+
 import time
 import json
 import argparse
@@ -164,7 +167,7 @@ if __name__ == '__main__':
 
     # File path or name
     parser.add_argument('--dataset', type=str, default='tab_fact',
-                        choices=['wikitq', 'tab_fact'])
+                        choices=['wikitq', 'tab_fact', 'finQA_table'])
     parser.add_argument('--dataset_split', type=str, default='validation', choices=['train', 'validation', 'test'])
     parser.add_argument('--api_keys_file', type=str, default='key.txt')
     parser.add_argument('--prompt_file', type=str, default='templates/prompts/wikitq_binder.txt')
